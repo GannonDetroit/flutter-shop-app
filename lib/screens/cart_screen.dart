@@ -58,6 +58,7 @@ class CartScreen extends StatelessWidget {
             child: ListView.builder(
               itemBuilder: (ctx, i) => CartItem(
                   //cart.items is a map (object) but this builder needs to pull info from lists, so add .value.toList() to avoid an bug/error due to data typing.
+                  productId: cart.items.keys.toList()[i],
                   id: cart.items.values.toList()[i].id,
                   title: cart.items.values.toList()[i].title,
                   quantity: cart.items.values.toList()[i].quantity,
