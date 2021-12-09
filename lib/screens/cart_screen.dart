@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 //importing only Cart because we don't need the CartItem class in providers, which since we us another class also called CartItem in the cart_item widget, helps avoid errors and confusion.
 import '../providers/cart.dart' show Cart;
 import '../widgets/cart_item.dart';
+import '../providers/orders.dart';
 
 class CartScreen extends StatelessWidget {
   static const routeName = '/cart';
@@ -43,7 +44,11 @@ class CartScreen extends StatelessWidget {
                     backgroundColor: Theme.of(context).colorScheme.primary,
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Provider.of<Orders>(context, listen: false).addOrder(
+                          cart.items.values.toList(), cart.totalAmount);
+                      cart.clearCart();
+                    },
                     child: Text('ORDER NOW'),
                     style: TextButton.styleFrom(
                         primary: Theme.of(context).colorScheme.primary),
