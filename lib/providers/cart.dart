@@ -18,11 +18,16 @@ class CartItem {
 
 //class for the cart as a whole.
 class Cart with ChangeNotifier {
-  Map<String, CartItem> _items;
+  Map<String, CartItem> _items = {};
 
 //always do this to avoid needing to directly mess with _items from outside components.
   Map<String, CartItem> get items {
     return {..._items};
+  }
+
+  //getter for cart count, doing the sum of product, not the sum of properties (so I have 2 products and one is quanity of 50, its going to say count is 2 not 52. this is by design choice nothing more.)
+  int get itemCount {
+    return _items.length;
   }
 
   void addItem(String productId, double price, String title) {
@@ -44,5 +49,6 @@ class Cart with ChangeNotifier {
               quantity: 1,
               price: price));
     }
+    notifyListeners();
   }
 }

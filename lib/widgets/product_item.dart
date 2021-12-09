@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../screens/product_detail_screen.dart';
 import '../providers/product.dart';
+import '../providers/cart.dart';
 
 class ProductItem extends StatelessWidget {
   // final String id;
@@ -18,6 +19,7 @@ class ProductItem extends StatelessWidget {
     //however, it has some advantages. with Provider.of, the entire build method is rerun, however in theory if I wanted only a subpart of this widget to rerun I could wrap it
     //in Consumer and be slightly more performant. an example here would be to use Provider.of with listen=false to get all the one-time data to populate this widget and then only wrap the
     //favorite button component below since its the only thing that changes and thus the only thing that needs to be rerendered. See video 199 if you want.
+    final cart = Provider.of<Cart>(context, listen: false);
     return Consumer<Product>(
       builder: (ctx, product, child) {
         return ClipRRect(
@@ -54,7 +56,9 @@ class ProductItem extends StatelessWidget {
               trailing: IconButton(
                 icon: Icon(Icons.shopping_cart),
                 color: Theme.of(context).colorScheme.secondary,
-                onPressed: () {},
+                onPressed: () {
+                  cart.addItem(product.id, product.price, product.title);
+                },
               ),
             ),
           ),

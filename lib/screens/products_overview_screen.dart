@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../widgets/products_grid.dart';
+import '../widgets/badge.dart';
+import '../providers/cart.dart';
 
 //enums are ways to assign labels to ints
 enum FilterOptions { Favorites, All }
@@ -28,6 +31,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
                 }
               });
             },
+            icon: Icon(Icons.more_vert),
             itemBuilder: (_) => [
               PopupMenuItem(
                 child: Text('Only Favorites'),
@@ -38,7 +42,17 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
                 value: FilterOptions.All,
               )
             ],
-            icon: Icon(Icons.more_vert),
+          ),
+          //childd is the icon button, the reason we do this is so it won't be rebuilt every single time cart changes. if I put iconButton in child: childd it would be less performant.
+          Consumer<Cart>(
+            builder: (_, cart, childd) => Badge(
+              child: childd,
+              value: cart.itemCount.toString(),
+            ),
+            child: IconButton(
+              onPressed: () {},
+              icon: Icon(Icons.shopping_cart),
+            ),
           )
         ],
       ),
