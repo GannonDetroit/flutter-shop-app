@@ -4,12 +4,15 @@ import './product_item.dart';
 import '../providers/products_provider.dart';
 
 class ProductsGrid extends StatelessWidget {
+  final bool showFavs;
+  ProductsGrid(this.showFavs);
+
   @override
   Widget build(BuildContext context) {
     //this provider of context sets up a behind-the-scences-connection to the ProviderNotifier in the main.dart file. This is the listener for when products state is updated. the <products> is VERY important so it knows what Provider to listen to.
     final productsData = Provider.of<Products>(context);
     //access the data we want to touch via our getter which is items.
-    final products = productsData.items;
+    final products = showFavs ? productsData.favItems : productsData.items;
 
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

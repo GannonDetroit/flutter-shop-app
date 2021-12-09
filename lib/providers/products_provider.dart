@@ -43,14 +43,34 @@ class Products with ChangeNotifier {
 //creating this getter because I dont want _items to be accessible outside of this class (which is why I gave it an _) by cloning a copy with ... and returning that
 //this non-underscored version of items means I won't hit some harsh bugs by attemping to change _items from outsider of this class, which won't have notifyListeners() correctly wired up (because its only accessible in this class thanks to the mixin).
 //failing to do things this way can prevent my widgets from rebuiding the actual latest data in _items.
+  // var _showFavoritesOnly = false;
   List<Product> get items {
+    // if (_showFavoritesOnly) {
+    //   return _items.where((prodItem) => prodItem.isFavorite).toList();
+    // } else {
+    // }
     return [..._items];
+  }
+
+  List<Product> get favItems {
+    return _items.where((prodItem) => prodItem.isFavorite).toList();
   }
 
   //do any 'logic' like finding, adding, deleting, etc in here instead of in widgets so its centralized, easy to find, and avoids writing repeat code.
   Product findById(String id) {
     return _items.firstWhere((product) => product.id == id);
   }
+
+  //Keep this an example of way to apply filters in an app-wide way, but in most cases you'll most likely just want to filter this in a specific widgets to avoid bugs.
+  // void showFavoritesOnly() {
+  //   _showFavoritesOnly = true;
+  //   notifyListeners();
+  // }
+
+  // void showAll() {
+  //   _showFavoritesOnly = false;
+  //   notifyListeners();
+  // }
 
   void addProduct() {
     //  _items.add(value);
