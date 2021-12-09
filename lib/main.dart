@@ -10,6 +10,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 //this ChangeNotifier listens for changes in Products provider, and any child widgets in the app that have a listener set up to this, ONLY those listening will get rebuilt when state in products is changed.
+//this could have been done with the .value and swapping create with value, since I don't actually use the context here, but I kept it as is for demo purposes.
     return ChangeNotifierProvider(
       create: (ctx) => Products(),
       child: MaterialApp(

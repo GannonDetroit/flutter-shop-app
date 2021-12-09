@@ -17,9 +17,11 @@ class ProductsGrid extends StatelessWidget {
           childAspectRatio: 3 / 2,
           crossAxisSpacing: 10,
           mainAxisSpacing: 10),
-      itemBuilder: (ctx, index) => ChangeNotifierProvider(
+      itemBuilder: (ctx, index) => ChangeNotifierProvider.value(
         //using the ChangeNotifier to listen to each individual product for changes, like when I favorite one or unfavorite it.
-        create: (ctx) => products[index],
+        //this example shows how to use .value which works if you are not using the context for anything (which we are not here).
+        //however, using .value is great when used in lists or grids like GridView.builder because it avoids bugs that are similar to when we need keys to stop widgets and data from getting out of wack.
+        value: products[index],
         child: ProductItem(
             // products[index].id,
             // products[index].title,
