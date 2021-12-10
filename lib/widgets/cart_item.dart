@@ -15,6 +15,28 @@ class CartItem extends StatelessWidget {
     //Dismissible allows each item to be swipeable for deletion, handling the animation and other heavy stuff out of the box for me. Needs a key
     return Dismissible(
       key: ValueKey(id),
+      //want to make the user confirm they actually want to delete or not.
+      confirmDismiss: (direction) {
+        return showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+                  title: Text('Are You Sure?'),
+                  content: Text('Do you want to remove the item from the cart'),
+                  actions: [
+                    //button actions to be nav related to pop the dialog away and then return true or false to the Future datatype for this widget to work.
+                    TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(false);
+                        },
+                        child: Text('No')),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(true);
+                        },
+                        child: Text('Yes'))
+                  ],
+                ));
+      },
       onDismissed: (direction) {
         Provider.of<Cart>(context, listen: false).removeItem(productId);
       },

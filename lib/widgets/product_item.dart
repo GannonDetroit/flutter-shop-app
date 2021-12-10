@@ -58,6 +58,23 @@ class ProductItem extends StatelessWidget {
                 color: Theme.of(context).colorScheme.secondary,
                 onPressed: () {
                   cart.addItem(product.id, product.price, product.title);
+                  //if there already a snackbar up (due to a user hyper tapping add), the old snackbar will be hidden before the new one is shown so there is less confusion and no bugs.
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  //using scaffold of.context (or ScaffoldMessenger of.context for snackbars) method to the nearest Scaffold widget/app layout (so this wouldn't work if this widget already was using scaffold since I'd already be in it), in this case its product overview screen
+                  //we do this because it allows us to do several things, in this case it will be to show a snack bar.
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(
+                      'Added item to cart!',
+                      // textAlign: TextAlign.center,
+                    ),
+                    duration: Duration(seconds: 2),
+                    action: SnackBarAction(
+                      label: 'UNDO',
+                      onPressed: () {
+                        cart.removeSingleItem(product.id);
+                      },
+                    ),
+                  ));
                 },
               ),
             ),
