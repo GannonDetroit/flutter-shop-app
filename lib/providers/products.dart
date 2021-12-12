@@ -72,6 +72,17 @@ class Products with ChangeNotifier {
   //   notifyListeners();
   // }
 
+  void updateProduct(String id, Product newProduct) {
+    final productIndex = _items.indexWhere((product) => product.id == id);
+    if (productIndex >= 0) {
+      _items[productIndex] = newProduct;
+      notifyListeners();
+    } else {
+      //this check shouldn't be required, i'm doing it more for demo purposes
+      print('...');
+    }
+  }
+
   void addProduct(Product product) {
     final newProduct = Product(
         title: product.title,

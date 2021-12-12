@@ -11,6 +11,14 @@ class EditProductScreen extends StatefulWidget {
 }
 
 class _EditProductScreenState extends State<EditProductScreen> {
+  var _initValues = {
+    'title': '',
+    'description': '',
+    'price': '',
+    'imageUrl': ''
+  };
+  //this is just to help not run didChangeDependencies too often.
+  var _isInit = true;
   var _editedProduct =
       Product(id: null, title: '', price: 0, description: '', imageUrl: '');
   //this is a global key; its used to access data/state from inside my widget below, 99% of time its for Forms.
@@ -38,6 +46,32 @@ class _EditProductScreenState extends State<EditProductScreen> {
     super.initState();
   }
 
+//needing to use this because, like explained somewhere else, we can't use ModalRoute.of(context) to extract the route args that we need (the product id in this case) due to lifescycle events not happening in the desired order
+//BUT we get around that by using this. IF I got the data from a different source instead of routing args, it would be fine to just do this in initState instead.
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      final productId =
+          ModalRoute.of(context).settings.arguments as String; //the id.
+      if (productId != null) {
+        //set the editedProduct with the ID so the rest of this widget works on editing the right one.
+        _editedProduct =
+            Provider.of<Products>(context, listen: false).findById(productId);
+        //if you're not making an new product, this will populate your form with the existing products info. Keeping price as a string so it can show up in the textField a double value wouldn't
+        _initValues = {
+          'title': _editedProduct.title,
+          'description': _editedProduct.description,
+          'price': _editedProduct.price.toString(),
+          //because I use a controller in imageUrl, I can't use initValue, I need to work with just the controller.
+          'imageUrl': ''
+        };
+        _imageUrlController.text = _editedProduct.imageUrl;
+      }
+    }
+    _isInit = false;
+    super.didChangeDependencies();
+  }
+
   //use a dispose method to do the clean up:
   @override
   void dispose() {
@@ -57,13 +91,15 @@ class _EditProductScreenState extends State<EditProductScreen> {
     }
     //running .save will trigger the onSaved method on every textformfield, allowing me to take the value in those fields and do whatever I want. like putting it in a map or list.
     _form.currentState.save();
-    Provider.of<Products>(context, listen: false).addProduct(_editedProduct);
+    //this will determine if we are editing an existing product or going to add a new product, since an new product would have id of null and an existing would would have a DateTime Value.
+    if (_editedProduct.id != null) {
+      Provider.of<Products>(context, listen: false)
+          .updateProduct(_editedProduct.id, _editedProduct);
+    } else {
+      Provider.of<Products>(context, listen: false).addProduct(_editedProduct);
+    }
+
     Navigator.of(context).pop();
-    // print(_editedProduct.id);
-    // print(_editedProduct.title);
-    // print(_editedProduct.price);
-    // print(_editedProduct.description);
-    // print(_editedProduct.imageUrl);
   }
 
   @override
@@ -84,6 +120,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
               children: [
                 //a special ersion of TextField that's specialized for Forms.
                 TextFormField(
+                  initialValue: _initValues['title'],
                   //MANY decorations options, look to offical docs for more.
                   decoration: InputDecoration(
                     labelText: 'Title',
@@ -110,10 +147,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         title: value,
                         price: _editedProduct.price,
                         description: _editedProduct.description,
-                        imageUrl: _editedProduct.imageUrl);
+                        imageUrl: _editedProduct.imageUrl,
+                        isFavorite: _editedProduct.isFavorite);
                   },
                 ),
                 TextFormField(
+                  initialValue: _initValues['price'],
                   decoration: InputDecoration(labelText: 'Price'),
                   validator: (value) {
                     if (value.isEmpty) {
@@ -142,10 +181,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         title: _editedProduct.title,
                         price: double.parse(value),
                         description: _editedProduct.description,
-                        imageUrl: _editedProduct.imageUrl);
+                        imageUrl: _editedProduct.imageUrl,
+                        isFavorite: _editedProduct.isFavorite);
                   },
                 ),
                 TextFormField(
+                  initialValue: _initValues['description'],
                   decoration: InputDecoration(labelText: 'Description'),
                   validator: (value) {
                     if (value.isEmpty) {
@@ -166,7 +207,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
                         title: _editedProduct.title,
                         price: _editedProduct.price,
                         description: value,
-                        imageUrl: _editedProduct.imageUrl);
+                        imageUrl: _editedProduct.imageUrl,
+                        isFavorite: _editedProduct.isFavorite);
                   },
                 ),
                 Row(
@@ -214,7 +256,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
                               title: _editedProduct.title,
                               price: _editedProduct.price,
                               description: _editedProduct.description,
-                              imageUrl: value);
+                              imageUrl: value,
+                              isFavorite: _editedProduct.isFavorite);
                         },
                       ),
                     )
