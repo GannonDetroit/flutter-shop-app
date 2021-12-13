@@ -105,8 +105,25 @@ class _EditProductScreenState extends State<EditProductScreen> {
       Navigator.of(context).pop();
     } else {
       Provider.of<Products>(context, listen: false)
+          //here I'm choosing to have the .then after the .catchError since I want this .then to run even if we get an error once the error message overley is pop'd
           .addProduct(_editedProduct)
-          .then((_) {
+          .catchError((err) {
+        //need to return showDialog<Null> so its returning a future, which will allow the following .then to still trigger.
+        return showDialog<Null>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+                  title: Text('an error occurred!'),
+                  content: Text('something went wrong'),
+                  actions: [
+                    TextButton(
+                        onPressed: () {
+                          //removes the error messager overlay
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('Okay'))
+                  ],
+                ));
+      }).then((_) {
         setState(() {
           _isLoading = false;
         });

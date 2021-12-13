@@ -1,5 +1,7 @@
 //you need to use a mixin, via the with keyword, it's like extending another class but the difference is you merge some properties and aspect into your current class but you don't make it
 //full instance (since you can only inherit from one class at a time), so mixins kinda allow you to inherit from more than one class at time.
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -91,6 +93,7 @@ class Products with ChangeNotifier {
   }
 
 //making ths into a Future datatype instead of void (even though i'm still resolving to void) so I can set up loading indicators.
+//i'll normally use async and await but I want to keep this as an example of using Futures and .thens (essentially Promises from JS).
   Future<void> addProduct(Product product) {
     //because HTTP request take some time to finish, you want to consider if you want to update the server first with the http request or update local/app state first or not.
     //remember that flutter in non-blocking so the code will keep going while you wait for the http request to resolve. here, I will use .then  to make sure the database updates before letting local state update.
@@ -124,6 +127,11 @@ class Products with ChangeNotifier {
       _items.add(newProduct);
       // _items.insert(0, newProduct);//if I wanted to add it to the beginning of the list instead of the end.
       notifyListeners();
+      //.catchError to do error handling, make sure its always and the end of your .then statements to help avoid bugs
+      //.then statements are skipped when an error is thrown.
+    }).catchError((error) {
+      // print(error);
+      throw error;
     });
   }
 }
