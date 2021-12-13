@@ -90,7 +90,8 @@ class Products with ChangeNotifier {
     notifyListeners();
   }
 
-  void addProduct(Product product) {
+//making ths into a Future datatype instead of void (even though i'm still resolving to void) so I can set up loading indicators.
+  Future<void> addProduct(Product product) {
     //because HTTP request take some time to finish, you want to consider if you want to update the server first with the http request or update local/app state first or not.
     //remember that flutter in non-blocking so the code will keep going while you wait for the http request to resolve. here, I will use .then  to make sure the database updates before letting local state update.
     //in firebase only, you can paste in the given uri for your database and just add whatever you want after the '/' like products in this case to create a collection (aka a folder) automatically.
@@ -99,7 +100,7 @@ class Products with ChangeNotifier {
     final url = Uri.parse(
         'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/products.json');
     //json.encode can't convert product striaght into json, so we need to make it a bit more explicit as map aka object so it does so correctly.
-    http
+    return http
         .post(
       url,
       //don't do ID because firebase or your backend should be generating a unique ID for you which is how you will keep things in sync.
