@@ -1,6 +1,8 @@
 //you need to use a mixin, via the with keyword, it's like extending another class but the difference is you merge some properties and aspect into your current class but you don't make it
 //full instance (since you can only inherit from one class at a time), so mixins kinda allow you to inherit from more than one class at time.
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'product.dart';
 
 //changenotifier allows us to establish behind the scenes communication tunnels in flutter with help from context widget.
@@ -89,14 +91,38 @@ class Products with ChangeNotifier {
   }
 
   void addProduct(Product product) {
-    final newProduct = Product(
-        title: product.title,
-        description: product.description,
-        price: product.price,
-        imageUrl: product.imageUrl,
-        id: DateTime.now().toString());
-    _items.add(newProduct);
-    // _items.insert(0, newProduct);//if I wanted to add it to the beginning of the list instead of the end.
-    notifyListeners();
+    //because HTTP request take some time to finish, you want to consider if you want to update the server first with the http request or update local/app state first or not.
+    //remember that flutter in non-blocking so the code will keep going while you wait for the http request to resolve. here, I will use .then  to make sure the database updates before letting local state update.
+    //in firebase only, you can paste in the given uri for your database and just add whatever you want after the '/' like products in this case to create a collection (aka a folder) automatically.
+
+    //remember that flutter runs ALL the code in this file first, and only then goes back to check on the results of Futures aka async code and then runs that stuff/the .thens
+    final url = Uri.parse(
+        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/products.json');
+    //json.encode can't convert product striaght into json, so we need to make it a bit more explicit as map aka object so it does so correctly.
+    http
+        .post(
+      url,
+      //don't do ID because firebase or your backend should be generating a unique ID for you which is how you will keep things in sync.
+      body: json.encode({
+        'title': product.title,
+        'description': product.description,
+        'imageUrl': product.imageUrl,
+        'price': product.price,
+        'isFavorite': product.isFavorite
+      }),
+    )
+        //this response from firebase holds a key, that it auto generates, that we get to use as a unqiue ID.
+        .then((response) {
+      //print(json.decode(response.body));
+      final newProduct = Product(
+          title: product.title,
+          description: product.description,
+          price: product.price,
+          imageUrl: product.imageUrl,
+          id: json.decode(response.body)['name']);
+      _items.add(newProduct);
+      // _items.insert(0, newProduct);//if I wanted to add it to the beginning of the list instead of the end.
+      notifyListeners();
+    });
   }
 }
