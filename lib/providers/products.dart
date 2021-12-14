@@ -3,6 +3,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+//http only throws its own errors for get and post, so if you do delete, put, or patch you need to do your own error handling
+
 import 'package:shop_app/models/http_exception.dart';
 import 'dart:convert';
 import '../models/http_exception.dart';
