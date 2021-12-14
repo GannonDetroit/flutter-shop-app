@@ -3,7 +3,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shop_app/models/http_exception.dart';
 import 'dart:convert';
+import '../models/http_exception.dart';
 import './product.dart';
 
 //changenotifier allows us to establish behind the scenes communication tunnels in flutter with help from context widget.
@@ -96,9 +98,29 @@ class Products with ChangeNotifier {
     }
   }
 
-  void deleteProduct(String id) {
-    _items.removeWhere((prod) => prod.id == id);
+//this is an example of optimistic updating, it ensures that you re-add/rollback the product if this fails.
+  Future<void> deleteProduct(String id) async {
+    final url = Uri.parse(
+        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/products/$id.json');
+    final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
+    //store a pointer referene to the product about to be deleted
+    var existingProduct = _items[existingProductIndex];
+    //remove from local state first
+    //this will remove the item from the list, but NOT from memory.
+    _items.removeAt(existingProductIndex);
     notifyListeners();
+    //this will remove it from the database, but if there is an error it will restore it.
+    final res = await http.delete(url);
+    //make sure I handle errors that are status code 400+ //tested this by removing .json from url.
+    if (res.statusCode >= 400) {
+      //rollback data on local state.
+      _items.insert(existingProductIndex, existingProduct);
+      notifyListeners();
+      //throw allows the code to continue to run despite an error.
+      throw HttpException('Could Not Delete Product');
+    }
+    //remove the memory reference to clean it up.
+    existingProduct = null;
   }
 
 //using async and await as the example method, promises are used in addProduct.

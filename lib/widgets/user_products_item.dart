@@ -11,6 +11,8 @@ class UserProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //doing this scaffod thing because I can't put ScaffoldMessenger the class into a future, but some how putting in a variable like this outside the future allows it to work for the snackbar.
+    final scaffold = ScaffoldMessenger.of(context);
     return ListTile(
       title: Text(title),
       //background image does NOT take an image widget, but instead a provider which is NetworkImage. So if you want to size it, you need to put in something like the circleAvatar
@@ -30,8 +32,18 @@ class UserProductItem extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
             ),
             IconButton(
-              onPressed: () {
-                Provider.of<Products>(context, listen: false).deleteProduct(id);
+              onPressed: () async {
+                try {
+                  await Provider.of<Products>(context, listen: false)
+                      .deleteProduct(id);
+                } catch (err) {
+                  scaffold.showSnackBar(SnackBar(
+                    content: Text(
+                      'Deleting Failed',
+                      textAlign: TextAlign.center,
+                    ),
+                  ));
+                }
               },
               icon: Icon(Icons.delete),
               color: Theme.of(context).errorColor,
