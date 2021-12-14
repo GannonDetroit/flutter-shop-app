@@ -43,16 +43,7 @@ class CartScreen extends StatelessWidget {
                     ),
                     backgroundColor: Theme.of(context).colorScheme.primary,
                   ),
-                  TextButton(
-                    onPressed: () {
-                      Provider.of<Orders>(context, listen: false).addOrder(
-                          cart.items.values.toList(), cart.totalAmount);
-                      cart.clearCart();
-                    },
-                    child: Text('ORDER NOW'),
-                    style: TextButton.styleFrom(
-                        primary: Theme.of(context).colorScheme.primary),
-                  )
+                  OrderButton(cart: cart)
                 ],
               ),
             ),
@@ -73,6 +64,48 @@ class CartScreen extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+}
+
+//extracted this button into a seperate widget so I could make ONLY it a stateful widget since I only need state to allow the loading indictator to work and
+//I don't want to conver the entire above widget into a stateful one just for that feature. leaving it in this file since it will only be used in this file so
+//why waste the time to make it a seperate file even though its techncially a seperate widget.
+class OrderButton extends StatefulWidget {
+  const OrderButton({
+    Key key,
+    @required this.cart,
+  }) : super(key: key);
+
+  final Cart cart;
+
+  @override
+  State<OrderButton> createState() => _OrderButtonState();
+}
+
+class _OrderButtonState extends State<OrderButton> {
+  var _isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      //if there is nothing in the cart, disable the button by having onPressed be null. otherwise allow order function to work.
+      onPressed: (widget.cart.totalAmount <= 0 || _isLoading)
+          ? null
+          : () async {
+              setState(() {
+                _isLoading = true;
+              });
+              await Provider.of<Orders>(context, listen: false).addOrder(
+                  widget.cart.items.values.toList(), widget.cart.totalAmount);
+              widget.cart.clearCart();
+              setState(() {
+                _isLoading = false;
+              });
+            },
+      child: _isLoading ? CircularProgressIndicator() : Text('ORDER NOW'),
+      style:
+          TextButton.styleFrom(primary: Theme.of(context).colorScheme.primary),
     );
   }
 }
