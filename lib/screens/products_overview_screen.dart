@@ -5,7 +5,7 @@ import '../widgets/app_drawer.dart';
 import '../widgets/products_grid.dart';
 import '../widgets/badge.dart';
 import '../providers/cart.dart';
-// import '../screens/cart_screen.dart';
+import '../providers/products.dart';
 
 //enums are ways to assign labels to ints
 enum FilterOptions { Favorites, All }
@@ -17,6 +17,36 @@ class ProductsOverviewScreen extends StatefulWidget {
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var _showOnlyFavorites = false;
+  var _isInit = true;
+  var _isLoading = false;
+
+  @override
+  // void initState() {
+  //   // Provider.of<Products>(context).fetchAndSetProducts(); //as noted before, you have two options to make this work. 1.) use listen:false or use this work around, otherwise you'll throw an error.
+  //   //work around option 1.
+  //   // Future.delayed(Duration.zero).then((_) {
+  //   //   Provider.of<Products>(context).fetchAndSetProducts();
+  //   // });
+  //   super.initState();
+  // }
+
+  //work around option2 that we normally use. do NOT use async await on overrides that are not themselves async await, it will change what they return and screw things up.
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      //needs to be inside setstate so the UI changes/updates.
+      setState(() {
+        _isLoading = true;
+      });
+      Provider.of<Products>(context).fetchAndSetProducts().then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+    _isInit = false;
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +93,11 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
       ),
       drawer: AppDrawer(),
       //itemBuilder passing build context and shows what widgets should be built, gridDelegate is how the grid should be structured (how many columns, etc), the rest is self-explanatory
-      body: ProductsGrid(_showOnlyFavorites),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : ProductsGrid(_showOnlyFavorites),
     );
   }
 }
