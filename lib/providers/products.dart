@@ -75,9 +75,19 @@ class Products with ChangeNotifier {
   //   notifyListeners();
   // }
 
-  void updateProduct(String id, Product newProduct) {
+  Future<void> updateProduct(String id, Product newProduct) async {
     final productIndex = _items.indexWhere((product) => product.id == id);
     if (productIndex >= 0) {
+      final url = Uri.parse(
+          'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/products/$id.json');
+      //.pathc will only update new info, and retain any old stuff (unlike .put that rewrites the data). so even though i'm missing isFavorite and id, they won't be overwriten in anyway.
+      http.patch(url,
+          body: json.encode({
+            'title': newProduct.title,
+            'description': newProduct.description,
+            'imageUrl': newProduct.imageUrl,
+            'price': newProduct.price
+          }));
       _items[productIndex] = newProduct;
       notifyListeners();
     } else {

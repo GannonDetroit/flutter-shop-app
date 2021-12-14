@@ -84,6 +84,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
     super.dispose();
   }
 
+//could refactor to use async await to add loading indicators for editing and deleting, but i'm skipping that for now.
   _saveForm() {
     setState(() {
       _isLoading = true;
