@@ -23,6 +23,41 @@ class Orders with ChangeNotifier {
     return [..._orders];
   }
 
+  Future<void> fetchandSetOrders() async {
+    final url = Uri.parse(
+        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/orders.json');
+
+    final res = await http.get(url);
+    // if (jsonDecode(res.body) == null) {
+    //   return;
+    // }
+
+    final List<OrderItem> loadedOrders = [];
+    final extractedData = json.decode(res.body) as Map<String, dynamic>;
+    if (extractedData == null) {
+      return; //do nothing, avoids a bug for when you have no orders
+    }
+    extractedData.forEach((orderId, orderData) {
+      loadedOrders.add(
+        OrderItem(
+          id: orderId,
+          amount: orderData['amount'],
+          dateTime: DateTime.parse(orderData['dateTime']),
+          products: (orderData['products'] as List<dynamic>)
+              .map((item) => CartItem(
+                  id: item['id'],
+                  price: item['price'],
+                  quantity: item['quantity'],
+                  title: item['title']))
+              .toList(),
+        ),
+      );
+    });
+    //.reversered.toList is to put it order of newest order first.
+    _orders = loadedOrders.reversed.toList();
+    notifyListeners();
+  }
+
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
     //doing the timeStamp here because putting it in the try block could screw it up by a few miliseconds between the .insert  and the .post
     final timeStamp = DateTime.now();

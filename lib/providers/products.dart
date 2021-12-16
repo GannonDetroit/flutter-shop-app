@@ -102,6 +102,9 @@ class Products with ChangeNotifier {
       //we know the values are maps but I can't do <String, Map> so use dynamic datatype instead.
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       final List<Product> loadedProducts = [];
+      if (extractedData == null) {
+        return; //return nothing, avoids a bug for when you have no products.
+      }
       extractedData.forEach((prodId, prodData) {
         loadedProducts.add(Product(
             id: prodId,
