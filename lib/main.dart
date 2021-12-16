@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shop_app/providers/auth.dart';
 import './screens/product_detail_screen.dart';
 import './screens/products_overview_screen.dart';
 import './screens/orders_screen.dart';
@@ -10,6 +11,7 @@ import 'screens/auth_screen.dart';
 import './providers/products.dart';
 import './providers/cart.dart';
 import './providers/orders.dart';
+import './providers/auth.dart';
 
 void main() => runApp(MyApp());
 
@@ -20,6 +22,8 @@ class MyApp extends StatelessWidget {
 //this could have been done with the .value and swapping create with value, since I don't actually use the context here, but I kept it as is for demo purposes.
     return MultiProvider(
       providers: [
+        //just for demo purposes i'm using the .value version for auth. but I could have done the other way too.
+        ChangeNotifierProvider.value(value: Auth()),
         ChangeNotifierProvider(
           create: (ctx) => Products(),
         ),
