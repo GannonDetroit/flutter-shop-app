@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import '../providers/auth.dart';
+import '../models/http_exception.dart';
 
 enum AuthMode { Signup, Login }
 
@@ -108,6 +109,22 @@ class _AuthCardState extends State<AuthCard> {
   var _isLoading = false;
   final _passwordController = TextEditingController();
 
+  void _showErrorDialog(String message) {
+    showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+              title: Text('An Error Occurred'),
+              content: Text(message),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                    },
+                    child: Text('Ok'))
+              ],
+            ));
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState.validate()) {
       // Invalid!
@@ -117,16 +134,40 @@ class _AuthCardState extends State<AuthCard> {
     setState(() {
       _isLoading = true;
     });
-    if (_authMode == AuthMode.Login) {
-      // Log user in
-      await Provider.of<Auth>(context, listen: false)
-          .login(_authData['email'], _authData['password']);
-    } else {
-      // Sign user up
-      //listen: false because if you're on the auth screen you're always unauthed and you're just sending a POST so you don't need to listen here.
-      await Provider.of<Auth>(context, listen: false)
-          .signup(_authData['email'], _authData['password']);
+    try {
+      if (_authMode == AuthMode.Login) {
+        // Log user in
+        await Provider.of<Auth>(context, listen: false)
+            .login(_authData['email'], _authData['password']);
+      } else {
+        // Sign user up
+        //listen: false because if you're on the auth screen you're always unauthed and you're just sending a POST so you don't need to listen here.
+        await Provider.of<Auth>(context, listen: false)
+            .signup(_authData['email'], _authData['password']);
+      }
+      //do a catch for specific httpException errors
+    } on HttpException catch (err) {
+      //doing it this way just as a demo, you can use switch statement instead, you can do a lot of this differently.
+      var errorMessage = 'Auth HTTP Error';
+      if (err.toString().contains('EMAIL_EXISTS')) {
+        errorMessage = 'This email address is already in use';
+      } else if (err.toString().contains('INVALID_EMAIL')) {
+        errorMessage = 'that is not a valid email';
+      } else if (err.toString().contains('WEAK_PASSWORD')) {
+        errorMessage = 'password is too weak';
+      } else if (err.toString().contains('EMAIL_NOT_FOUND')) {
+        errorMessage = 'could not find a user with that email';
+      } else if (err.toString().contains('INVALID_PASSWORD')) {
+        errorMessage = 'invalid password, try agian.';
+      }
+      _showErrorDialog(errorMessage);
     }
+    //do a catch for any other random errors like losing internet connection.
+    catch (err) {
+      const errorMessage = 'could not authenticate, please try again later';
+      _showErrorDialog(errorMessage);
+    }
+
     setState(() {
       _isLoading = false;
     });
