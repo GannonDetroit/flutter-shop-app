@@ -119,6 +119,8 @@ class _AuthCardState extends State<AuthCard> {
     });
     if (_authMode == AuthMode.Login) {
       // Log user in
+      await Provider.of<Auth>(context, listen: false)
+          .login(_authData['email'], _authData['password']);
     } else {
       // Sign user up
       //listen: false because if you're on the auth screen you're always unauthed and you're just sending a POST so you don't need to listen here.
