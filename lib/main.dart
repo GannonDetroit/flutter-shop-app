@@ -25,33 +25,38 @@ class MyApp extends StatelessWidget {
 //this ChangeNotifier listens for changes in Products provider, and any child widgets in the app that have a listener set up to this, ONLY those listening will get rebuilt when state in products is changed.
 //this could have been done with the .value and swapping create with value, since I don't actually use the context here, but I kept it as is for demo purposes.
     return MultiProvider(
-      providers: [
-        //just for demo purposes i'm using the .value version for auth. but I could have done the other way too.
-        ChangeNotifierProvider.value(value: Auth()),
-        ChangeNotifierProvider(
-          create: (ctx) => Products(),
-        ),
-        ChangeNotifierProvider(create: (ctx) => Cart()),
-        ChangeNotifierProvider(create: (ctx) => Orders())
-      ],
-      child: MaterialApp(
-        title: 'MyShop',
-        theme: ThemeData(
-            primarySwatch: Colors.purple,
-            fontFamily: 'Lato',
-            colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.purple)
-                .copyWith(secondary: Colors.deepOrange)),
-        home: AuthScreen(),
-        routes: {
-          ProductDetailScreen.routeName: (ctx) => ProductDetailScreen(),
-          CartScreen.routeName: (ctx) => CartScreen(),
-          OrdersScreen.routeName: (ctx) => OrdersScreen(),
-          UserProductsScreen.routeName: (ctx) => UserProductsScreen(),
-          EditProductScreen.routeName: (ctx) => EditProductScreen(),
-          // ProductsOverviewScreen.routeName: (ctx) => ProductsOverviewScreen(),
-        },
-        debugShowCheckedModeBanner: false,
-      ),
-    );
+        providers: [
+          //just for demo purposes i'm using the .value version for auth. but I could have done the other way too.
+          ChangeNotifierProvider.value(value: Auth()),
+          ChangeNotifierProvider(
+            create: (ctx) => Products(),
+          ),
+          ChangeNotifierProvider(create: (ctx) => Cart()),
+          ChangeNotifierProvider(create: (ctx) => Orders())
+        ],
+        //adding consumer for auth on the entire app allows me to rebuild the app based on if someone is logged in or not, this is better than defaulting to login page because then
+        //user would need to re-login ALL THE DAMN TIME when the app restarts. This way we can avoid some of that by storing the auth token locally. So this method allows me to have the
+        //default home route be dynamically decided.
+        child: Consumer<Auth>(
+          builder: (ctx, auth, _) => MaterialApp(
+            title: 'MyShop',
+            theme: ThemeData(
+                primarySwatch: Colors.purple,
+                fontFamily: 'Lato',
+                colorScheme:
+                    ColorScheme.fromSwatch(primarySwatch: Colors.purple)
+                        .copyWith(secondary: Colors.deepOrange)),
+            home: auth.isAuth ? ProductsOverviewScreen() : AuthScreen(),
+            routes: {
+              ProductDetailScreen.routeName: (ctx) => ProductDetailScreen(),
+              CartScreen.routeName: (ctx) => CartScreen(),
+              OrdersScreen.routeName: (ctx) => OrdersScreen(),
+              UserProductsScreen.routeName: (ctx) => UserProductsScreen(),
+              EditProductScreen.routeName: (ctx) => EditProductScreen(),
+              // ProductsOverviewScreen.routeName: (ctx) => ProductsOverviewScreen(),
+            },
+            debugShowCheckedModeBanner: false,
+          ),
+        ));
   }
 }
