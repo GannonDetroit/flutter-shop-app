@@ -28,8 +28,14 @@ class MyApp extends StatelessWidget {
         providers: [
           //just for demo purposes i'm using the .value version for auth. but I could have done the other way too.
           ChangeNotifierProvider.value(value: Auth()),
-          ChangeNotifierProvider(
-            create: (ctx) => Products(),
+          //using ProxyProvider because I need to pass the authToken as a arg into Products and we can't do that with just normal provider.
+          //ProxyProvide works by relying on a provider that is set up BEFORE this one, so order matters, Auth needs to be above this.
+          ChangeNotifierProxyProvider<Auth, Products>(
+            //need this create method to initialize things even though nothing is being passed, the update will fill it with the needed info.
+            create: (ctx) => Products('', []),
+            //getting auth from Auth provider and getting previousProducts from Products provider _items essentially.
+            update: (ctx, auth, previousProducts) => Products(auth.token,
+                previousProducts == null ? [] : previousProducts.items),
           ),
           ChangeNotifierProvider(create: (ctx) => Cart()),
           ChangeNotifierProvider(create: (ctx) => Orders())

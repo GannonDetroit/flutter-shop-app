@@ -13,6 +13,9 @@ import './product.dart';
 //changenotifier allows us to establish behind the scenes communication tunnels in flutter with help from context widget.
 class Products with ChangeNotifier {
   List<Product> _items = [];
+  final String authToken;
+
+  Products(this.authToken, this._items);
 
 //creating this getter because I dont want _items to be accessible outside of this class (which is why I gave it an _) by cloning a copy with ... and returning that
 //this non-underscored version of items means I won't hit some harsh bugs by attemping to change _items from outsider of this class, which won't have notifyListeners() correctly wired up (because its only accessible in this class thanks to the mixin).
@@ -95,7 +98,9 @@ class Products with ChangeNotifier {
 //using async and await as the example method, promises are used in addProduct.
   Future<void> fetchAndSetProducts() async {
     final url = Uri.parse(
-        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/products.json');
+        //firebase gives you this url, but you need to add ?auth=token to the end if its a protected endpoint (which it should be).
+        //for other API's you might need to add the auth token as a header instead of in the URL which is easy with http.get(url, headers: {token: 'abc'})
+        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/products.json?auth=$authToken');
     try {
       final response = await http.get(url);
       // print(json.decode(response.body));
