@@ -53,7 +53,7 @@ class Products with ChangeNotifier {
     final productIndex = _items.indexWhere((product) => product.id == id);
     if (productIndex >= 0) {
       final url = Uri.parse(
-          'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/products/$id.json');
+          'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken');
       //.pathc will only update new info, and retain any old stuff (unlike .put that rewrites the data). so even though i'm missing isFavorite and id, they won't be overwriten in anyway.
       http.patch(url,
           body: json.encode({
@@ -73,7 +73,7 @@ class Products with ChangeNotifier {
 //this is an example of optimistic updating, it ensures that you re-add/rollback the product if this fails.
   Future<void> deleteProduct(String id) async {
     final url = Uri.parse(
-        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/products/$id.json');
+        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken');
     final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
     //store a pointer referene to the product about to be deleted
     var existingProduct = _items[existingProductIndex];
@@ -135,7 +135,7 @@ class Products with ChangeNotifier {
 
     //remember that flutter runs ALL the code in this file first, and only then goes back to check on the results of Futures aka async code and then runs that stuff/the .thens
     final url = Uri.parse(
-        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/products.json');
+        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/products.json?auth=$authToken');
     //json.encode can't convert product striaght into json, so we need to make it a bit more explicit as map aka object so it does so correctly.
     return http
         .post(

@@ -38,7 +38,11 @@ class MyApp extends StatelessWidget {
                 previousProducts == null ? [] : previousProducts.items),
           ),
           ChangeNotifierProvider(create: (ctx) => Cart()),
-          ChangeNotifierProvider(create: (ctx) => Orders())
+          ChangeNotifierProxyProvider<Auth, Orders>(
+            create: (ctx) => Orders('', []),
+            update: (ctx, auth, previousOrders) => Orders(auth.token,
+                previousOrders == null ? [] : previousOrders.orders),
+          )
         ],
         //adding consumer for auth on the entire app allows me to rebuild the app based on if someone is logged in or not, this is better than defaulting to login page because then
         //user would need to re-login ALL THE DAMN TIME when the app restarts. This way we can avoid some of that by storing the auth token locally. So this method allows me to have the
