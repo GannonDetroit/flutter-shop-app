@@ -111,31 +111,31 @@ class _AuthCardState extends State<AuthCard>
   final _passwordController = TextEditingController();
   //animationController,Animatio, and Size are provided by flutter;
   //the controller is to help start and revert the animation and Animation is to do the heavy lifting of the actual animation.
-  AnimationController _controller;
-  Animation<Size> _heightAnimation;
+//   AnimationController _controller;
+//   Animation<Size> _heightAnimation;
 
-  @override
-  void initState() {
-    //vsync gives the animation a pointer to the object/widget its suppose to watch (only when its on the screen, it has optization built in too).
-    //had to add SingleTickerProviderStateMixin, which allows the app to know when/if a widget is visible, which is why we use the 'this' keyword here.
-    _controller =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
-    //the tween class is a class that just knows how to animate between two values. since I only want to animate height differences i keep width the same and specify what the heights are.
-    _heightAnimation = Tween<Size>(
-            begin: Size(double.infinity, 260), end: Size(double.infinity, 320))
-        .animate(CurvedAnimation(
-            parent: _controller,
-            curve: Curves
-                .linear)); //curve how you change up the animation within the duration, you do linear, fastOutSlowIn, check the docs there are many options.
-    super.initState();
-  }
+//   @override
+//   void initState() {
+//     //vsync gives the animation a pointer to the object/widget its suppose to watch (only when its on the screen, it has optization built in too).
+//     //had to add SingleTickerProviderStateMixin, which allows the app to know when/if a widget is visible, which is why we use the 'this' keyword here.
+//     _controller =
+//         AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+//     //the tween class is a class that just knows how to animate between two values. since I only want to animate height differences i keep width the same and specify what the heights are.
+//     _heightAnimation = Tween<Size>(
+//             begin: Size(double.infinity, 260), end: Size(double.infinity, 320))
+//         .animate(CurvedAnimation(
+//             parent: _controller,
+//             curve: Curves
+//                 .linear)); //curve how you change up the animation within the duration, you do linear, fastOutSlowIn, check the docs there are many options.
+//     super.initState();
+//   }
 
-//kill the controller
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+// //kill the controller
+//   @override
+//   void dispose() {
+//     _controller.dispose();
+//     super.dispose();
+//   }
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -207,13 +207,13 @@ class _AuthCardState extends State<AuthCard>
         _authMode = AuthMode.Signup;
       });
       //starts the animation.
-      _controller.forward();
+      // _controller.forward();
     } else {
       setState(() {
         _authMode = AuthMode.Login;
       });
       //reverses it.
-      _controller.reverse();
+      // _controller.reverse();
     }
   }
 
@@ -228,17 +228,20 @@ class _AuthCardState extends State<AuthCard>
       //using animated builder has flutter handle things. it will execute something for me and then rebuilds the UI after that something is done.
       //the childd arg is for putting in the child widgets of my animated widget. this prevents the child from being re-rendered and improves performance.
       //so i'm animating the container, and its child is Form. I'm telling the AnimatedBuilder to animate Container but don't rerender Form since its child
-      //I spelt it childd so I can see the differences between the two widgets better.
-      child: AnimatedBuilder(
-        animation: _heightAnimation,
-        builder: (context, childd) => Container(
-            // height: _authMode == AuthMode.Signup ? 320 : 260,
-            height: _heightAnimation.value.height,
-            constraints:
-                BoxConstraints(minHeight: _heightAnimation.value.height),
-            width: deviceSize.width * 0.75,
-            padding: EdgeInsets.all(16.0),
-            child: childd),
+      //I spelt it childd so I can see the differences between the two widgets better. [[I changed to AnimatedContainer, check previous commit to see the
+      //animatedBuilder example.]]
+
+      //animatedContainer does all the heavy lifting with animations that deal with changinga  containers dimensions/size.
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeIn,
+        height: _authMode == AuthMode.Signup ? 320 : 260,
+        // height: _heightAnimation.value.height,
+        // constraints: BoxConstraints(minHeight: _heightAnimation.value.height),
+        constraints:
+            BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 320 : 260),
+        width: deviceSize.width * 0.75,
+        padding: EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
