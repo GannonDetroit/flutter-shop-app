@@ -111,31 +111,36 @@ class _AuthCardState extends State<AuthCard>
   final _passwordController = TextEditingController();
   //animationController,Animatio, and Size are provided by flutter;
   //the controller is to help start and revert the animation and Animation is to do the heavy lifting of the actual animation.
-//   AnimationController _controller;
-//   Animation<Size> _heightAnimation;
+  AnimationController _controller;
+  Animation<Offset> _slideAnimation;
+  Animation<double> _opacityAnimation;
 
-//   @override
-//   void initState() {
-//     //vsync gives the animation a pointer to the object/widget its suppose to watch (only when its on the screen, it has optization built in too).
-//     //had to add SingleTickerProviderStateMixin, which allows the app to know when/if a widget is visible, which is why we use the 'this' keyword here.
-//     _controller =
-//         AnimationController(vsync: this, duration: Duration(milliseconds: 300));
-//     //the tween class is a class that just knows how to animate between two values. since I only want to animate height differences i keep width the same and specify what the heights are.
-//     _heightAnimation = Tween<Size>(
-//             begin: Size(double.infinity, 260), end: Size(double.infinity, 320))
-//         .animate(CurvedAnimation(
-//             parent: _controller,
-//             curve: Curves
-//                 .linear)); //curve how you change up the animation within the duration, you do linear, fastOutSlowIn, check the docs there are many options.
-//     super.initState();
-//   }
+  @override
+  void initState() {
+    //vsync gives the animation a pointer to the object/widget its suppose to watch (only when its on the screen, it has optization built in too).
+    //had to add SingleTickerProviderStateMixin, which allows the app to know when/if a widget is visible, which is why we use the 'this' keyword here.
+    _controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    //the tween class is a class that just knows how to animate between two values.
+    _slideAnimation = Tween<Offset>(begin: Offset(0, -1.5), end: Offset(0, 0))
+        .animate(CurvedAnimation(
+            parent: _controller,
+            curve: Curves
+                .linear)); //curve how you change up the animation within the duration, you do linear, fastOutSlowIn, check the docs there are many options.
 
-// //kill the controller
-//   @override
-//   void dispose() {
-//     _controller.dispose();
-//     super.dispose();
-//   }
+    //make it from invisible to solid visble.
+    _opacityAnimation = Tween(begin: 0.0, end: 1.0)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+
+    super.initState();
+  }
+
+//kill the controller
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -207,13 +212,13 @@ class _AuthCardState extends State<AuthCard>
         _authMode = AuthMode.Signup;
       });
       //starts the animation.
-      // _controller.forward();
+      _controller.forward();
     } else {
       setState(() {
         _authMode = AuthMode.Login;
       });
       //reverses it.
-      // _controller.reverse();
+      _controller.reverse();
     }
   }
 
@@ -274,20 +279,34 @@ class _AuthCardState extends State<AuthCard>
                     _authData['password'] = value;
                   },
                 ),
-                if (_authMode == AuthMode.Signup)
-                  TextFormField(
-                    enabled: _authMode == AuthMode.Signup,
-                    decoration: InputDecoration(labelText: 'Confirm Password'),
-                    obscureText: true,
-                    validator: _authMode == AuthMode.Signup
-                        ? (value) {
-                            if (value != _passwordController.text) {
-                              return 'Passwords do not match!';
-                            }
-                            return null;
-                          }
-                        : null,
+                //just the FadeTransition reservers the 'excess space' and look wonky, so to avoid that issue just wrap it in an AnimatedContainer with min max contraints.
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 300),
+                  curve: Curves.easeIn,
+                  constraints: BoxConstraints(
+                      minHeight: _authMode == AuthMode.Signup ? 60 : 0,
+                      maxHeight: _authMode == AuthMode.Signup ? 120 : 0),
+                  child: FadeTransition(
+                    opacity: _opacityAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: TextFormField(
+                        enabled: _authMode == AuthMode.Signup,
+                        decoration:
+                            InputDecoration(labelText: 'Confirm Password'),
+                        obscureText: true,
+                        validator: _authMode == AuthMode.Signup
+                            ? (value) {
+                                if (value != _passwordController.text) {
+                                  return 'Passwords do not match!';
+                                }
+                                return null;
+                              }
+                            : null,
+                      ),
+                    ),
                   ),
+                ),
                 SizedBox(
                   height: 20,
                 ),
