@@ -27,6 +27,10 @@ class Auth with ChangeNotifier {
   final API_KEY =
       dotenv.get('firebaseAuthApi', fallback: 'DOTENV DID NOT WORK');
 
+  String get userId {
+    return _userId;
+  }
+
   Future<void> _authenticate(
       String email, String password, String urlSegment) async {
     final url = Uri.parse(

@@ -14,8 +14,13 @@ import './product.dart';
 class Products with ChangeNotifier {
   List<Product> _items = [];
   final String authToken;
+  final String userId;
 
-  Products(this.authToken, this._items);
+  Products(
+    this.authToken,
+    this.userId,
+    this._items,
+  );
 
 //creating this getter because I dont want _items to be accessible outside of this class (which is why I gave it an _) by cloning a copy with ... and returning that
 //this non-underscored version of items means I won't hit some harsh bugs by attemping to change _items from outsider of this class, which won't have notifyListeners() correctly wired up (because its only accessible in this class thanks to the mixin).
@@ -110,6 +115,12 @@ class Products with ChangeNotifier {
       if (extractedData == null) {
         return; //return nothing, avoids a bug for when you have no products.
       }
+      //need to fetch the list of data thats the users favorited products
+      final urlFav = Uri.parse(
+          'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/userFavorites/$userId.json?auth=$authToken');
+      final favoriteResponse = await http.get(urlFav);
+      final favData = json.decode(favoriteResponse.body);
+
       extractedData.forEach((prodId, prodData) {
         loadedProducts.add(Product(
             id: prodId,
@@ -117,7 +128,9 @@ class Products with ChangeNotifier {
             price: prodData['price'],
             description: prodData['description'],
             imageUrl: prodData['imageUrl'],
-            isFavorite: prodData['isFavorite']));
+            //check if the use has never favorited anything to make this false to avoid a bug,
+            //also check to make sure the prodId isn't null by using the ??, which is a operator to check if something is null or not and if null does x if not does y.
+            isFavorite: favData == null ? false : favData[prodId] ?? false));
       });
       _items = loadedProducts;
       notifyListeners();
@@ -146,7 +159,6 @@ class Products with ChangeNotifier {
         'description': product.description,
         'imageUrl': product.imageUrl,
         'price': product.price,
-        'isFavorite': product.isFavorite
       }),
     )
         //this response from firebase holds a key, that it auto generates, that we get to use as a unqiue ID.

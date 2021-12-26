@@ -25,18 +25,21 @@ class Product with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> toggleFavoriteStatus(String token) async {
+  Future<void> toggleFavoriteStatus(
+    String token,
+    String userId,
+  ) async {
     final oldStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners(); //this is the equalivent of using setState, make sure you use it whenever your changing the state of the app, but know it only works in the ChangeNotifier is on
     final url = Uri.parse(
-        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/products/$id.json?auth=$token');
+        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/userFavorites/$userId/$id.json?auth=$token');
 
     try {
-      final res = await http.patch(url,
-          body: json.encode({
-            'isFavorite': isFavorite,
-          }));
+      final res = await http.put(url,
+          body: json.encode(
+            isFavorite, //this is a bool value so I don't need to do this like an object {'isFav': fav} type thing.
+          ));
       if (res.statusCode >= 400) {
         _setFavValue(oldStatus);
       }

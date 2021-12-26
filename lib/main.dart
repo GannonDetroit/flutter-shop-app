@@ -32,9 +32,11 @@ class MyApp extends StatelessWidget {
           //ProxyProvide works by relying on a provider that is set up BEFORE this one, so order matters, Auth needs to be above this.
           ChangeNotifierProxyProvider<Auth, Products>(
             //need this create method to initialize things even though nothing is being passed, the update will fill it with the needed info.
-            create: (ctx) => Products('', []),
+            create: (ctx) => Products('', '', []),
             //getting auth from Auth provider and getting previousProducts from Products provider _items essentially.
-            update: (ctx, auth, previousProducts) => Products(auth.token,
+            update: (ctx, auth, previousProducts) => Products(
+                auth.token,
+                auth.userId,
                 previousProducts == null ? [] : previousProducts.items),
           ),
           ChangeNotifierProvider(create: (ctx) => Cart()),
