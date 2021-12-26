@@ -51,8 +51,9 @@ class MyApp extends StatelessWidget {
         //adding consumer for auth on the entire app allows me to rebuild the app based on if someone is logged in or not, this is better than defaulting to login page because then
         //user would need to re-login ALL THE DAMN TIME when the app restarts. This way we can avoid some of that by storing the auth token locally. So this method allows me to have the
         //default home route be dynamically decided.
-        child: Consumer<Auth>(
-          builder: (ctx, auth, _) => MaterialApp(
+        child: Consumer<Auth>(builder: (ctx, auth, _) {
+          ifAuth(targetScreen) => auth.isAuth ? targetScreen : AuthScreen();
+          return MaterialApp(
             title: 'MyShop',
             theme: ThemeData(
                 primarySwatch: Colors.purple,
@@ -62,15 +63,17 @@ class MyApp extends StatelessWidget {
                         .copyWith(secondary: Colors.deepOrange)),
             home: auth.isAuth ? ProductsOverviewScreen() : AuthScreen(),
             routes: {
-              ProductDetailScreen.routeName: (ctx) => ProductDetailScreen(),
-              CartScreen.routeName: (ctx) => CartScreen(),
-              OrdersScreen.routeName: (ctx) => OrdersScreen(),
-              UserProductsScreen.routeName: (ctx) => UserProductsScreen(),
-              EditProductScreen.routeName: (ctx) => EditProductScreen(),
+              ProductDetailScreen.routeName: (ctx) =>
+                  ifAuth(ProductDetailScreen()),
+              CartScreen.routeName: (ctx) => ifAuth(CartScreen()),
+              OrdersScreen.routeName: (ctx) => ifAuth(OrdersScreen()),
+              UserProductsScreen.routeName: (ctx) =>
+                  ifAuth(UserProductsScreen()),
+              EditProductScreen.routeName: (ctx) => ifAuth(EditProductScreen()),
               // ProductsOverviewScreen.routeName: (ctx) => ProductsOverviewScreen(),
             },
             debugShowCheckedModeBanner: false,
-          ),
-        ));
+          );
+        }));
   }
 }
