@@ -11,12 +11,13 @@ class UserProductsScreen extends StatelessWidget {
 //since this is not a stateful widget, you need to add context as a arg for it work via BuildContext;
 //remember that async await always returns a future automatically so it makes it easier to use on things that expect futures to be returned, like the onRefresh method.
   Future<void> _refreshProducts(BuildContext context) async {
-    await Provider.of<Products>(context, listen: false).fetchAndSetProducts();
+    await Provider.of<Products>(context, listen: false)
+        .fetchAndSetProducts(true);
   }
 
   @override
   Widget build(BuildContext context) {
-    final productsData = Provider.of<Products>(context);
+    // final productsData = Provider.of<Products>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -30,26 +31,39 @@ class UserProductsScreen extends StatelessWidget {
         ],
       ),
       drawer: AppDrawer(),
-      //the RefreshIndicator gives us pull to refresh functionality out of the box, with a loading spinner and everything.
-      body: RefreshIndicator(
-        onRefresh: () => _refreshProducts(context),
-        child: Padding(
-          padding: EdgeInsets.all(8),
-          child: ListView.builder(
-            itemBuilder: (_, index) {
-              return Column(
-                children: [
-                  UserProductItem(
-                      productsData.items[index].id,
-                      productsData.items[index].title,
-                      productsData.items[index].imageUrl),
-                  Divider()
-                ],
-              );
-            },
-            itemCount: productsData.items.length,
-          ),
-        ),
+      //FutureBuilder fetch data when this screen first loads (and reloads, even though this specific screen doesn't). then show either the
+      //progress indicator or the main page (listen false is critical for _refreshProducts or this will be an infinite loop), then the Consumer will
+      //rebuild with the correct/most up to date info.
+      body: FutureBuilder(
+        future: _refreshProducts(context),
+        builder: (ctx, snapshot) => snapshot.connectionState ==
+                ConnectionState.waiting
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            //the RefreshIndicator gives us pull to refresh functionality out of the box, with a loading spinner and everything.
+            : RefreshIndicator(
+                onRefresh: () => _refreshProducts(context),
+                child: Consumer<Products>(
+                  builder: (ctx, productsData, _) => Padding(
+                    padding: EdgeInsets.all(8),
+                    child: ListView.builder(
+                      itemBuilder: (_, index) {
+                        return Column(
+                          children: [
+                            UserProductItem(
+                                productsData.items[index].id,
+                                productsData.items[index].title,
+                                productsData.items[index].imageUrl),
+                            Divider()
+                          ],
+                        );
+                      },
+                      itemCount: productsData.items.length,
+                    ),
+                  ),
+                ),
+              ),
       ),
     );
   }

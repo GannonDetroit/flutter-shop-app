@@ -101,11 +101,15 @@ class Products with ChangeNotifier {
   }
 
 //using async and await as the example method, promises are used in addProduct.
-  Future<void> fetchAndSetProducts() async {
+// [ ] allow for optional positional args and give it a default value. I can choose if I want to filterByUser or not. (not for the whole shop, yes for managing user products).
+  Future<void> fetchAndSetProducts([bool filterByUser = false]) async {
+    //if i'm filtering add the filter logic to the URI, otherwise just leave the end empty.
+    final filterString =
+        filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
     final url = Uri.parse(
         //firebase gives you this url, but you need to add ?auth=token to the end if its a protected endpoint (which it should be).
         //for other API's you might need to add the auth token as a header instead of in the URL which is easy with http.get(url, headers: {token: 'abc'})
-        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/products.json?auth=$authToken');
+        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/products.json?auth=$authToken&$filterString');
     try {
       final response = await http.get(url);
       // print(json.decode(response.body));
@@ -159,6 +163,7 @@ class Products with ChangeNotifier {
         'description': product.description,
         'imageUrl': product.imageUrl,
         'price': product.price,
+        'creatorId': userId
       }),
     )
         //this response from firebase holds a key, that it auto generates, that we get to use as a unqiue ID.
