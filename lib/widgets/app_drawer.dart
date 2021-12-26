@@ -48,6 +48,8 @@ class AppDrawer extends StatelessWidget {
             onTap: () {
               //avoid a bug by closing the nav drawer before logging out.
               Navigator.of(context).pop();
+              //going to main screen to logout since its the only screen where we check auth status.
+              Navigator.of(context).pushReplacementNamed('/');
               Provider.of<Auth>(context, listen: false).logout();
             },
           )
