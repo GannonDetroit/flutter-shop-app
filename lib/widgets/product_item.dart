@@ -28,15 +28,16 @@ class ProductItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           child: GridTile(
             child: GestureDetector(
-              onTap: () {
-                Navigator.of(context).pushNamed(ProductDetailScreen.routeName,
-                    arguments: product.id);
-              },
-              child: Image.network(
-                product.imageUrl,
-                fit: BoxFit.cover,
-              ),
-            ),
+                onTap: () {
+                  Navigator.of(context).pushNamed(ProductDetailScreen.routeName,
+                      arguments: product.id);
+                },
+                child: FadeInImage(
+                  placeholder:
+                      AssetImage('assets/images/edit_product_screen.png'),
+                  image: NetworkImage(product.imageUrl),
+                  fit: BoxFit.cover,
+                )),
             //can provide the title and button to each tile.
             footer: GridTileBar(
               backgroundColor: Colors.black87,
