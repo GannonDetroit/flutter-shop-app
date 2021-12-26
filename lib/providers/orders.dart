@@ -19,8 +19,9 @@ class OrderItem {
 class Orders with ChangeNotifier {
   List<OrderItem> _orders = [];
   final String authToken;
+  final String userId;
 
-  Orders(this.authToken, this._orders);
+  Orders(this.authToken, this.userId, this._orders);
 
   List<OrderItem> get orders {
     return [..._orders];
@@ -28,7 +29,7 @@ class Orders with ChangeNotifier {
 
   Future<void> fetchandSetOrders() async {
     final url = Uri.parse(
-        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/orders.json?auth=$authToken');
+        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/orders/$userId.json?auth=$authToken');
 
     final res = await http.get(url);
     // if (jsonDecode(res.body) == null) {
@@ -65,7 +66,7 @@ class Orders with ChangeNotifier {
     //doing the timeStamp here because putting it in the try block could screw it up by a few miliseconds between the .insert  and the .post
     final timeStamp = DateTime.now();
     final url = Uri.parse(
-        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/orders.json?auth=$authToken');
+        'https://flutter-shop-app-10a51-default-rtdb.firebaseio.com/orders/$userId.json?auth=$authToken');
 
     final res = await http.post(
       url,
