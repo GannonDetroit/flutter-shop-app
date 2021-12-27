@@ -14,6 +14,7 @@ import './providers/products.dart';
 import './providers/cart.dart';
 import './providers/orders.dart';
 import './providers/auth.dart';
+import './helpers/custom_route.dart';
 
 Future<void> main() async {
   await dotenv.load();
@@ -57,6 +58,11 @@ class MyApp extends StatelessWidget {
                   title: 'MyShop',
                   theme: ThemeData(
                       primarySwatch: Colors.purple,
+                      //set up different transitions based on platform, or make all transtions use a custom transition if you want.
+                      pageTransitionsTheme: PageTransitionsTheme(builders: {
+                        TargetPlatform.android: CustomPageTransitionBuider(),
+                        TargetPlatform.iOS: CustomPageTransitionBuider()
+                      }),
                       fontFamily: 'Lato',
                       colorScheme:
                           ColorScheme.fromSwatch(primarySwatch: Colors.purple)
