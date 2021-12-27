@@ -19,16 +19,18 @@ class ProductDetailScreen extends StatelessWidget {
         Provider.of<Products>(context, listen: false).findById(productId);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(loadedProduct.title),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              height: 300,
-              width: double.infinity,
-              child: Hero(
+      body: CustomScrollView(
+        //slivers are parts on the screen that are scrollable.
+        slivers: <Widget>[
+          SliverAppBar(
+            //height it should have when its not the appbar but the image instead.
+            expandedHeight: 300,
+            //appbar will always be visible
+            pinned: true,
+            //what should be inside the appbar/how it will change
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(loadedProduct.title),
+              background: Hero(
                 tag: loadedProduct.id,
                 child: Image.network(
                   loadedProduct.imageUrl,
@@ -36,12 +38,17 @@ class ProductDetailScreen extends StatelessWidget {
                 ),
               ),
             ),
+          ),
+          //the list of widgets
+          SliverList(
+              delegate: SliverChildListDelegate([
             SizedBox(
               height: 10,
             ),
             Text(
               '\$${loadedProduct.price}',
               style: TextStyle(color: Colors.grey, fontSize: 20),
+              textAlign: TextAlign.center,
             ),
             SizedBox(
               height: 10,
@@ -53,9 +60,13 @@ class ProductDetailScreen extends StatelessWidget {
                   loadedProduct.description,
                   textAlign: TextAlign.center,
                   softWrap: true,
-                ))
-          ],
-        ),
+                )),
+            //just so I can see/test the scroll animation.
+            SizedBox(
+              height: 800,
+            )
+          ]))
+        ],
       ),
     );
   }
