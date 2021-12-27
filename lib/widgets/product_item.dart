@@ -32,11 +32,16 @@ class ProductItem extends StatelessWidget {
                   Navigator.of(context).pushNamed(ProductDetailScreen.routeName,
                       arguments: product.id);
                 },
-                child: FadeInImage(
-                  placeholder:
-                      AssetImage('assets/images/edit_product_screen.png'),
-                  image: NetworkImage(product.imageUrl),
-                  fit: BoxFit.cover,
+                //adding hero animation for when you click on an item and transition to its detail screen.
+                child: Hero(
+                  tag: product
+                      .id, //can be anything, but an ID is often good since their can't be duplicates that can cause confusion/bugs.
+                  child: FadeInImage(
+                    placeholder:
+                        AssetImage('assets/images/edit_product_screen.png'),
+                    image: NetworkImage(product.imageUrl),
+                    fit: BoxFit.cover,
+                  ),
                 )),
             //can provide the title and button to each tile.
             footer: GridTileBar(
